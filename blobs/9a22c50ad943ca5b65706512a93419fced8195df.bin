@@ -1,0 +1,81 @@
++#include<algorithm>
+ 
++  ,row_blocks_(map_size)
++  ,col_blocks_(map_size)
++
++  for(int i=0;i<map_size;i++){
++    row_blocks_[i].push_back(-1);
++    row_blocks_[i].push_back(map_size);
++    col_blocks_[i].push_back(-1);
++    col_blocks_[i].push_back(map_size);
++  }
+ 
+-  
++bool State::is_block(Pos pos) const{
++  if(!pos.is_on_map()) return true;
++
++  const auto& row=row_blocks_[pos.i];
++  auto it=std::lower_bound(row.begin(),row.end(),pos.j);
++  return it!=row.end() && *it==pos.j;
++}
++
++bool State::move(Direction dir){
++  Pos next=pos_+DIRS[static_cast<int>(dir)];
++  if(is_block(next)) return false;
++
++  pos_=next;
++  return true;
++}
++
++bool State::slide(Direction dir){
++  switch(dir){
++    case Direction::UP:{
++      const auto& col=col_blocks_[pos_.j];
++      auto it=std::lower_bound(col.begin(),col.end(),pos_.i);
++      --it;
++      pos_.i=*it+1;
++      return true;
++    }
++    case Direction::DOWN:{
++      const auto& col=col_blocks_[pos_.j];
++      auto it=std::upper_bound(col.begin(),col.end(),pos_.i);
++      pos_.i=*it-1;
++      return true;
++    }
++    case Direction::RIGHT:{
++      const auto& row=row_blocks_[pos_.i];
++      auto it=std::upper_bound(row.begin(),row.end(),pos_.j);
++      pos_.j=*it-1;
++      return true;
++    }
++    case Direction::LEFT:{
++      const auto& row=row_blocks_[pos_.i];
++      auto it=std::lower_bound(row.begin(),row.end(),pos_.j);
++      --it;
++      pos_.j=*it+1;
++      return true;
++    }
++  }
++
++  return false;
++}
++
++bool State::change(Pos pos){
++  if(!pos.is_on_map()) return false;
++
++  auto& row=row_blocks_[pos.i];
++  auto row_it=std::lower_bound(row.begin(),row.end(),pos.j);
++
++  auto& col=col_blocks_[pos.j];
++  auto col_it=std::lower_bound(col.begin(),col.end(),pos.i);
++
++  if(row_it!=row.end() && *row_it==pos.j){
++    row.erase(row_it);
++    col.erase(col_it);
++  }else{
++    row.insert(row_it,pos.j);
++    col.insert(col_it,pos.i);
++  }
++
++  return true;
++}
