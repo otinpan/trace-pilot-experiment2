@@ -1,0 +1,188 @@
+# Record 1: file:///home/hase/trace-pilot-experiment2/src/common.h
+```diff
+===================================================================
+--- common.h (before)	snapshot
++++ common.h (after)	external
+@@ -50,18 +50,11 @@
+ 
+ const std::array<char,3> ACTIONS_CHAR={
+   'M',
+   'S',
+-  'C'
++  'A'
+ };
+ 
+-struct ActionRecord{
+-  ActionType type;
+-  Pos pos=Pos(-1,-1);
+-};
+-
+-
+-
+ enum class Direction{
+   UP,
+   DOWN,
+   RIGHT,
+@@ -74,8 +67,14 @@
+   'R',
+   'L'
+ };
+ 
++struct ActionRecord{
++  ActionType type;
++  Pos pos=Pos(-1,-1);
++  Direction dir=Direction::UP;
++};
++
+ const std::array<Pos,4> DIRS={
+   Pos(-1,0),
+   Pos(1,0),
+   Pos(0,1),
+@@ -92,5 +91,4 @@
+   assert(false);
+   return Direction::UP;
+ }
+ 
+-
+
+```
+
+# Record 2: file:///home/hase/trace-pilot-experiment2/src/navigator.cpp
+```diff
+===================================================================
+--- navigator.cpp (before)	snapshot
++++ navigator.cpp (after)	idle
+@@ -34,9 +34,10 @@
+     }
+ 
+     // move
+     for(int k=0;k<DIRS.size();k++){
+-      auto next=move(now,static_cast<Direction>(k));
++      const Direction dir=static_cast<Direction>(k);
++      auto next=move(now,dir);
+       if(!next){
+         continue;
+       }
+       if(dist[next->i][next->j]!=-1){
+@@ -44,14 +45,15 @@
+       }
+ 
+       q.push(*next);
+       dist[next->i][next->j]=d+1;
+-      pre[next->i][next->j]=ActionRecord{ActionType::MOVE,now};
++      pre[next->i][next->j]=ActionRecord{ActionType::MOVE,now,dir};
+     }
+ 
+     // slide
+     for(int k=0;k<DIRS.size();k++){
+-      auto next=slide(now,static_cast<Direction>(k));
++      const Direction dir=static_cast<Direction>(k);
++      auto next=slide(now,dir);
+       if(!next){
+         continue;
+       }
+       if(dist[next->i][next->j]!=-1){
+@@ -59,21 +61,22 @@
+       }
+ 
+       q.push(*next);
+       dist[next->i][next->j]=d+1;
+-      pre[next->i][next->j]=ActionRecord{ActionType::SLIDE,now};
++      pre[next->i][next->j]=ActionRecord{ActionType::SLIDE,now,dir};
+     }
+   }
+ 
++// @trace-pilot ac8f01f4bc9b03667e67f8ccd716b35e27159ec9
+   if(dist[to.i][to.j]==-1){
+     return {};
+   }
+ 
+   vector<ActionRecord> path;
+   Pos cur=to;
+   while(cur!=from){
+     const ActionRecord record=pre[cur.i][cur.j];
+-    path.push_back(ActionRecord{record.type,cur});
++    path.push_back(record);
+     cur=record.pos;
+   }
+   reverse(path.begin(),path.end());
+   return path;
+
+```
+
+# Record 3: file:///home/hase/trace-pilot-experiment2/build/CMakeFiles/Progress/count.txt
+```diff
+===================================================================
+--- count.txt (before)	snapshot
++++ count.txt (after)	create
+@@ -0,0 +1,1 @@
++6
+
+```
+
+# Record 4: file:///home/hase/trace-pilot-experiment2/build/CMakeFiles/TargetDirectories.txt
+```diff
+===================================================================
+--- TargetDirectories.txt (before)	snapshot
++++ TargetDirectories.txt (after)	create
+@@ -0,0 +1,3 @@
++/home/hase/trace-pilot-experiment2/build/CMakeFiles/ahc046.dir
++/home/hase/trace-pilot-experiment2/build/CMakeFiles/edit_cache.dir
++/home/hase/trace-pilot-experiment2/build/CMakeFiles/rebuild_cache.dir
+
+```
+
+# Record 5: file:///home/hase/trace-pilot-experiment2/build/CMakeFiles/ahc046.dir/link.txt
+```diff
+===================================================================
+--- link.txt (before)	snapshot
++++ link.txt (after)	create
+@@ -0,0 +1,1 @@
++/usr/bin/c++ CMakeFiles/ahc046.dir/src/main.cpp.o CMakeFiles/ahc046.dir/src/logger.cpp.o CMakeFiles/ahc046.dir/src/navigator.cpp.o CMakeFiles/ahc046.dir/src/strategy/strategy.cpp.o CMakeFiles/ahc046.dir/src/strategy/greedy.cpp.o -o ahc046 
+
+```
+
+`ActionRecord` に `Direction` を追加し、`Navigator::bfs()` が「操作種別、操作前位置、方向」を返すように揃えます。既存の `Greedy::solve()` は BFS の結果を連結するだけなので、基本的にはそのまま動くはずです。
+
+`common.h` では `ActionRecord` より後に `Direction` が定義されているので、先に `Direction` を定義する形に入れ替えます。ついでに問題文上、変更操作の出力文字は `A` なので `ACTIONS_CHAR` も合わせます。
+
+次に `Navigator::bfs()` の `pre` に方向も保存します。復元時は `pos` を到達後ではなく「その操作を行う前の位置」のまま返すように直します。
+
+これで `ActionRecord` は `type + 操作前pos + dir` になりました。全体をビルドして、初期化子の崩れや定義順の問題がないか確認します。
+
+できます。`ActionRecord` に `Direction dir` を追加して、`Navigator::bfs()` が方向も記録するように変更しました。
+
+変更後の形は [src/common.h](/home/hase/trace-pilot-experiment2/src/common.h:70) です。
+
+```cpp
+struct ActionRecord{
+  ActionType type;
+  Pos pos=Pos(-1,-1);          // 操作前の位置
+  Direction dir=Direction::UP; // 操作方向
+};
+```
+
+`bfs()` 側では、探索時に `dir` を保存します。
+
+```cpp
+pre[next->i][next->j]=ActionRecord{ActionType::MOVE,now,dir};
+pre[next->i][next->j]=ActionRecord{ActionType::SLIDE,now,dir};
+```
+
+復元時は `record` をそのまま返すので、`pos` は「操作前の位置」のまま維持されます。
+
+```cpp
+path.push_back(record);
+cur=record.pos;
+```
+
+あとは出力時にこう使えます。
+
+```cpp
+std::cout << ACTIONS_CHAR[action.type] << ' '
+          << DIRS_CHAR[static_cast<int>(action.dir)] << '\n';
+```
+
+ついでに、問題文では `CHANGE` の出力文字が `A` なので、`ACTIONS_CHAR` の3番目を `'C'` から `'A'` に直しています。
+
+`cmake --build build` は通っています。
