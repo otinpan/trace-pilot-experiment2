@@ -1,0 +1,41 @@
+-    case Direction::UP:
++    case Direction::UP:{
+-      auto iter=std::lower_bound(col.begin(),col.end(),pos.j);
++      auto iter=std::lower_bound(col.begin(),col.end(),pos.i);
+-    case Direction::DOWN:
++    }
++    case Direction::DOWN:{
++      const auto& col=col_blocks_[pos.j];
++      auto iter=std::upper_bound(col.begin(),col.end(),pos.i);
++      if(iter==col.end()){
++        next.i=map_size-1;
++      }else{
++        next.i=*iter-1;
++      }
+-    case Direction::RIGHT:
++    }
++    case Direction::RIGHT:{
++      const auto& row=row_blocks_[pos.i];
++      auto iter=std::upper_bound(row.begin(),row.end(),pos.j);
++      if(iter==row.end()){
++        next.j=map_size-1;
++      }else{
++        next.j=*iter-1;
++      }
+-    case Direction::LEFT:
++    }
++    case Direction::LEFT:{
++      const auto& row=row_blocks_[pos.i];
++      auto iter=std::lower_bound(row.begin(),row.end(),pos.j);
++      if(iter==row.begin()){
++        next.j=0;
++      }else{
++        --iter;
++        next.j=*iter+1;
++      }
++    }
+ 
++  if(next==pos){
++    return std::nullopt;
++  }
++
