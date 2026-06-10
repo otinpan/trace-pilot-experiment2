@@ -1,0 +1,1 @@
+Improve the C++ code for managing blocks on a map by adding functionality to efficiently add or remove positions in sorted row and column vectors, update a bitset of blocks, and include appropriate assertions to ensure correctness.
