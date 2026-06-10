@@ -1,0 +1,58 @@
+# Record 1: file:///home/hase/trace-pilot-experiment2/src/state.h
+```diff
+===================================================================
+--- state.h (before)	snapshot
++++ state.h (after)	idle
+@@ -1,8 +1,7 @@
+ #pragma once
+ #include<iostream>
+ #include<vector>
+-#include<array>
+ 
+ #include"common.h"
+ 
+ class State{
+
+```
+
+# Record 2: file:///home/hase/trace-pilot-experiment2/build/CMakeFiles/TargetDirectories.txt
+```diff
+===================================================================
+--- TargetDirectories.txt (before)	snapshot
++++ TargetDirectories.txt (after)	create
+@@ -0,0 +1,3 @@
++/home/hase/trace-pilot-experiment2/build/CMakeFiles/ahc062.dir
++/home/hase/trace-pilot-experiment2/build/CMakeFiles/edit_cache.dir
++/home/hase/trace-pilot-experiment2/build/CMakeFiles/rebuild_cache.dir
+
+```
+
+`block_` を持たずに、行・列のソート済み集合だけでブロック有無と滑走先を扱える形にします。まず既存の未実装メソッドに合わせて `State` を拡張します。
+
+これから `State` に `row_blocks_` / `col_blocks_` を追加し、番兵 `-1` と `map_size` を入れて、`lower_bound` で追加・削除・滑走先計算をできるようにします。`block_` は追加しません。
+
+ヘッダに保持構造を入れました。続けて `state.cpp` 側で番兵初期化、二分探索による toggle、滑走処理を実装します。
+
+実装を入れました。`Direction` の enum 順と `DIRS` の順が一致している前提で `move` も補完しています。ビルドして型・リンクの問題を確認します。
+
+差分は意図通りです。`state.h` の `<array>` は不要なので落としてから、CMake ビルドを通します。
+
+不要 include を外しました。ビルド設定済みか確認しつつコンパイルします。
+
+実装しました。`block_` は使わず、[src/state.h](/home/hase/trace-pilot-experiment2/src/state.h) に以下を持たせています。
+
+```cpp
+std::vector<std::vector<int>> row_blocks_;
+std::vector<std::vector<int>> col_blocks_;
+```
+
+[src/state.cpp](/home/hase/trace-pilot-experiment2/src/state.cpp) では、各行・列に番兵として `-1` と `map_size` を入れています。これで外周ブロックも同じロジックで扱えます。
+
+実装済みの内容:
+
+- `change(Pos pos)`: `lower_bound` で探して、あれば削除、なければソート位置に挿入
+- `slide(Direction dir)`: 行・列の `lower_bound` / `upper_bound` で一番近いブロックを探して停止位置へ移動
+- `move(Direction dir)`: `is_block` で移動先がブロックか確認
+- `is_block(Pos pos)`: 外側はブロック扱い、内側は `row_blocks_` で二分探索
+
+`cmake -S . -B build && cmake --build build` も通っています。
