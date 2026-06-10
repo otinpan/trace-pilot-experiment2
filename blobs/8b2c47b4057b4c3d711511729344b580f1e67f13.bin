@@ -1,0 +1,49 @@
+# Record 1: file:///home/hase/trace-pilot-experiment2/src/navigator.cpp
+```diff
+===================================================================
+--- navigator.cpp (before)	snapshot
++++ navigator.cpp (after)	idle
+@@ -5,9 +5,11 @@
+   :blocks_()
+   ,row_blocks_()
+   ,col_blocks_()
+ {
+-
++  for(const auto& block:blocks){
++    change_block(block);
++  }
+ }
+ 
+ std::vector<ActionRecord> Navigator::bfs(Pos from,Pos to){
+ 
+
+```
+
+まずREADMEと既存のnavigator実装を読んで、`row_blocks_` / `col_blocks_` の形と更新経路に合わせて `change_block` を入れます。
+
+`State::change_block` に同じ種類の更新処理がありそうです。そこを基準に、Navigator 側のデータ構造と公開APIの期待を確認します。
+
+`Navigator` はまだ空実装が多いですが、`change_block` 単体は `State` と同じ方針で実装できます。`std::lower_bound` を使うので `navigator.cpp` 側に `<algorithm>` も足します。
+
+`src/state.h` が見当たらないのでプロジェクト全体のビルドは別問題で止まる可能性があります。今回の変更は `Navigator` のブロック反転処理に絞って入れます。
+
+実装は入りました。念のため `navigator.cpp` 単体の構文チェックをして、追加した処理にコンパイル上の問題がないか確認します。
+
+構文チェックは通りました。警告は既存の未実装箇所（constructor の引数未使用、`bfs` の未 return）から出ています。差分表示が空だったので、ファイルの実内容と git 状態を確認します。
+
+`Navigator(std::vector<Pos> blocks)` が初期ブロック一覧を受け取る形なので、`change_block` を作っただけだと初期状態が反映されません。関連する最小変更として、constructor で受け取ったブロックを `change_block` 経由で登録するようにします。
+
+初期化もつなげました。もう一度 `navigator.cpp` 単体で確認します。
+
+実装しました。
+
+[ src/navigator.cpp ](/home/hase/trace-pilot-experiment2/src/navigator.cpp:2) に `<algorithm>` を追加し、`Navigator::change_block` で以下を行うようにしました。
+
+- `blocks_` の該当ビットを反転
+- `row_blocks_[i]` に列 `j` を sorted に挿入/削除
+- `col_blocks_[j]` に行 `i` を sorted に挿入/削除
+- 削除時は `assert` で整合性確認
+
+また、constructor で渡された初期ブロック一覧を `change_block` 経由で登録するようにしました。
+
+確認として `g++ -std=c++17 -Wall -Wextra -fsyntax-only src/navigator.cpp` は通っています。残っている警告は既存の未実装 `Navigator::bfs` の `return` なし・引数未使用です。
