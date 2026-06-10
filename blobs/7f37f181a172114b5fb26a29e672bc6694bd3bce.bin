@@ -1,0 +1,116 @@
+# Record 1: file:///home/hase/trace-pilot-experiment2/src/strategy/greedy.cpp
+```diff
+===================================================================
+--- greedy.cpp (before)	snapshot
++++ greedy.cpp (after)	external
+@@ -8,6 +8,22 @@
+ 
+ Greedy::~Greedy()=default;
+ 
+ std::vector<ActionRecord> Greedy::solve(Navigator& navigator, Logger& logger){
++  (void)logger;
+ 
++  std::vector<ActionRecord> result;
++  if(distinations_.empty()){
++    return result;
++  }
++
++  Pos current=distinations_.front();
++  for(size_t i=1;i<distinations_.size();i++){
++    const Pos target=distinations_[i];
++    std::vector<ActionRecord> path=navigator.bfs(current,target);
++
++    result.insert(result.end(),path.begin(),path.end());
++    current=target;
++  }
++
++  return result;
+ }
+
+```
+
+# Record 2: file:///home/hase/trace-pilot-experiment2/CMakeLists.txt
+```diff
+===================================================================
+--- CMakeLists.txt (before)	snapshot
++++ CMakeLists.txt (after)	external
+@@ -11,8 +11,9 @@
+     src/logger.cpp
+     src/simulator.cpp
+     src/navigator.cpp
+     src/strategy/strategy.cpp
++    src/strategy/greedy.cpp
+ )
+ 
+ target_include_directories(ahc046 PRIVATE
+     "${CMAKE_SOURCE_DIR}/src"
+@@ -21,5 +22,4 @@
+ set_target_properties(ahc046 PROPERTIES
+     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build"
+ )
+ 
+-
+
+```
+
+# Record 3: file:///home/hase/trace-pilot-experiment2/build/CMakeFiles/TargetDirectories.txt
+```diff
+===================================================================
+--- TargetDirectories.txt (before)	snapshot
++++ TargetDirectories.txt (after)	create
+@@ -0,0 +1,3 @@
++/home/hase/trace-pilot-experiment2/build/CMakeFiles/ahc046.dir
++/home/hase/trace-pilot-experiment2/build/CMakeFiles/edit_cache.dir
++/home/hase/trace-pilot-experiment2/build/CMakeFiles/rebuild_cache.dir
+
+```
+
+# Record 4: file:///home/hase/trace-pilot-experiment2/build/CMakeFiles/ahc046.dir/link.txt
+```diff
+===================================================================
+--- link.txt (before)	snapshot
++++ link.txt (after)	create
+@@ -0,0 +1,1 @@
++/usr/bin/c++ CMakeFiles/ahc046.dir/src/main.cpp.o CMakeFiles/ahc046.dir/src/logger.cpp.o CMakeFiles/ahc046.dir/src/simulator.cpp.o CMakeFiles/ahc046.dir/src/navigator.cpp.o CMakeFiles/ahc046.dir/src/strategy/strategy.cpp.o CMakeFiles/ahc046.dir/src/strategy/greedy.cpp.o -o ahc046 
+
+```
+
+`Greedy` の有無と `Strategy::solve()` の現在形を確認します。`Navigator::bfs()` の返り値をどう消費して出力用の `Pos` 列に戻すかが主点になります。
+
+`Greedy` クラスはすでにあります。実装ファイルと `main` の出力形式を見て、`ActionRecord` の並べ方を既存の期待に合わせます。
+
+`Greedy::solve()` は未実装で、`CMakeLists.txt` に `greedy.cpp` もまだ入っていません。開始位置や入力仕様を確認して、最初の `from` をどう決めるべきか見ます。
+
+入力仕様上、`distinations_` には `i_0` も含めて渡す想定にすると自然です。なので `distinations_[0]` を開始位置、`distinations_[1..]` を順番に訪れる目的地として BFS をつなぎます。
+
+`Greedy::solve()` 本体を入れました。`greedy.cpp` がビルド対象に入っていないので、通常ビルドでも検査されるように `CMakeLists.txt` も最小限で更新します。
+
+実装は単純に「現在地から次の目的地へ BFS、結果を連結、現在地を更新」です。コンパイルで不足 include などが出ないか確認します。
+
+`Greedy::solve()` はこういう形で実装しました。
+
+```cpp
+std::vector<ActionRecord> Greedy::solve(Navigator& navigator, Logger& logger){
+  (void)logger;
+
+  std::vector<ActionRecord> result;
+  if(distinations_.empty()){
+    return result;
+  }
+
+  Pos current=distinations_.front();
+  for(size_t i=1;i<distinations_.size();i++){
+    const Pos target=distinations_[i];
+    std::vector<ActionRecord> path=navigator.bfs(current,target);
+
+    result.insert(result.end(),path.begin(),path.end());
+    current=target;
+  }
+
+  return result;
+}
+```
+
+前提は `distinations_[0]` が初期位置 `(i_0, j_0)`、`distinations_[1..]` が訪問対象です。各目的地ごとに `navigator.bfs(current, target)` を呼び、返ってきた `ActionRecord` 列をそのまま連結します。`navigator` のブロック状態は更新しないので、ブロックを一切配置しない Greedy になります。
+
+あわせて [CMakeLists.txt](/home/hase/trace-pilot-experiment2/CMakeLists.txt:17) に `src/strategy/greedy.cpp` を追加し、`cmake --build build` は通っています。
