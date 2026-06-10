@@ -1,0 +1,22 @@
++#include<algorithm>
+ 
++  assert(pos.is_on_map());
++
++  auto& row=row_blocks_[pos.i];
++  auto row_it=std::lower_bound(row.begin(),row.end(),pos.j);
++
++  auto& col=col_blocks_[pos.j];
++  auto col_it=std::lower_bound(col.begin(),col.end(),pos.i);
++
++  const int block_index=index(pos);
++  if(!blocks_.test(block_index)){
++    row.insert(row_it,pos.j);
++    col.insert(col_it,pos.i);
++  }else{
++    assert(row_it!=row.end() && *row_it==pos.j);
++    assert(col_it!=col.end() && *col_it==pos.i);
++    row.erase(row_it);
++    col.erase(col_it);
++  }
++
++  blocks_.flip(block_index);
