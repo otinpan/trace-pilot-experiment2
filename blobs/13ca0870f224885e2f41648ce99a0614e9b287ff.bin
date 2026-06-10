@@ -1,0 +1,95 @@
+# Record 1: file:///home/hase/trace-pilot-experiment2/src/state.h
+```diff
+===================================================================
+--- state.h (before)	snapshot
++++ state.h (after)	idle
+@@ -16,11 +16,30 @@
+     bool change(Pos pos);
+     void undo();
+ 
+   private:
++    enum class ActionType{
++      MOVE,
++      SLIDE,
++      CHANGE
++    };
++
++    struct ActionRecord{
++      ActionType type;
++      Direction dir;
++      Pos prev_pos;
++      int prev_visited_count;
++      int prev_score;
++      Pos changed_pos;
++      bool block_existed_before;
++    };
++
+     Pos pos_;
+     std::vector<Pos> dists_;
++    int visited_count_;
++    int score_;
+ // @trace-pilot dd0baa8fd8fbadd16ef9fe1378ad550dd61386a2
+     std::array<std::vector<int>,20> row_blocks_;
+     std::array<std::vector<int>,20> col_blocks_;
++    std::vector<ActionRecord> history_;
+ 
+ };
+
+```
+
+# Record 2: file:///home/hase/trace-pilot-experiment2/build/CMakeFiles/Progress/count.txt
+```diff
+===================================================================
+--- count.txt (before)	snapshot
++++ count.txt (after)	create
+@@ -0,0 +1,1 @@
++6
+
+```
+
+`State` の可変状態を戻せるように、`state.h` に履歴用の `ActionRecord` と `history_` を追加します。実装は触らず、ヘッダの構造だけ整えます。
+
+現在のヘッダにはすでに `undo()` 宣言があります。そこに `ActionRecord` と、スコア・訪問カウンタを戻すための履歴フィールドを追加します。
+
+ヘッダ構造を追加しました。`visited_count_` と `score_` はコンストラクタ初期化が必要なので、ビルドが落ちるか確認して必要なら宣言側だけで安全に初期値を入れます。
+
+[src/state.h](/home/hase/trace-pilot-experiment2/src/state.h) に `ActionRecord` を追加しました。`undo()` で戻しやすいように、行動前の状態を保存する形です。
+
+追加した主な内容:
+
+```cpp
+enum class ActionType{
+  MOVE,
+  SLIDE,
+  CHANGE
+};
+
+struct ActionRecord{
+  ActionType type;
+  Direction dir;
+  Pos prev_pos;
+  int prev_visited_count;
+  int prev_score;
+  Pos changed_pos;
+  bool block_existed_before;
+};
+```
+
+あわせて `State` に以下も追加しています。
+
+```cpp
+int visited_count_;
+int score_;
+std::vector<ActionRecord> history_;
+```
+
+これで `undo()` では履歴の末尾を見て、
+
+- `pos_`
+- `visited_count_`
+- `score_`
+- `change` したブロック状態
+
+を戻せる構造になります。
+
+`cmake --build build` は通っています。
