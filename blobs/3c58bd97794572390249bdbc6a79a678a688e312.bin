@@ -1,0 +1,100 @@
+# Record 1: file:///home/hase/trace-pilot-experiment2/src/navigator.cpp
+```diff
+===================================================================
+--- navigator.cpp (before)	snapshot
++++ navigator.cpp (after)	idle
+@@ -56,28 +56,58 @@
+ 
+ std::optional<Pos> Navigator::slide(const Pos& pos,Direction dir){
+   Pos next=pos;
+   switch(dir){
+-    case Direction::UP:
++    case Direction::UP:{
+       const auto& col=col_blocks_[pos.j];
+-      auto iter=std::lower_bound(col.begin(),col.end(),pos.j);
++      auto iter=std::lower_bound(col.begin(),col.end(),pos.i);
+       if(iter==col.begin()){
+         next.i=0;
+       }else{
+         --iter;
+         next.i=*iter+1;
+       }
+       break;
+-    case Direction::DOWN:
++    }
++    case Direction::DOWN:{
++      const auto& col=col_blocks_[pos.j];
++      auto iter=std::upper_bound(col.begin(),col.end(),pos.i);
++      if(iter==col.end()){
++        next.i=map_size-1;
++      }else{
++        next.i=*iter-1;
++      }
+       break;
+-    case Direction::RIGHT:
++    }
++    case Direction::RIGHT:{
++      const auto& row=row_blocks_[pos.i];
++      auto iter=std::upper_bound(row.begin(),row.end(),pos.j);
++      if(iter==row.end()){
++        next.j=map_size-1;
++      }else{
++        next.j=*iter-1;
++      }
+       break;
+-    case Direction::LEFT:
++    }
++    case Direction::LEFT:{
++      const auto& row=row_blocks_[pos.i];
++      auto iter=std::lower_bound(row.begin(),row.end(),pos.j);
++      if(iter==row.begin()){
++        next.j=0;
++      }else{
++        --iter;
++        next.j=*iter+1;
++      }
+       break;
++    }
+     default:
+       assert(false);
+   }
+ 
++  if(next==pos){
++    return std::nullopt;
++  }
++
+   return next;
+ }
+ 
+ bool Navigator::get_block(const Pos& pos){
+
+```
+
+`slide()` だけを既存構造に合わせて差し替えます。`row_blocks_` / `col_blocks_` はすでにソート維持されているので、そこに `lower_bound` / `upper_bound` を使います。
+
+実装は入れました。次にコンパイルだけ通して、スコープ付き `case` や `map_size` 参照まわりに問題がないか確認します。
+
+`tsconfig.json` はこのリポジトリにはなく、`cmake --build .` もビルドディレクトリ未生成で失敗しました。CMake の構成を確認して、最小のビルド確認を行います。
+
+`build/` はありますが、トップではなく `build` ディレクトリを指定してビルドする構成です。`navigator.cpp` がターゲットに入っているかも確認して進めます。
+
+ビルドは `src/state.h` が存在しない既存問題で止まっています。`slide()` 自体の差分確認が空だったので、作業ツリー上の現在内容を直接確認します。
+
+`navigator.cpp` は Git 管理外の新規ファイルとして存在しているため `git diff -- src/navigator.cpp` には出ていませんでした。構文確認だけなら単体コンパイルで見られるので、それを実行します。
+
+`slide()` を実装しました。変更箇所は [src/navigator.cpp](/home/hase/trace-pilot-experiment2/src/navigator.cpp:57) です。
+
+`row_blocks_` / `col_blocks_` がソート済みで維持されている前提で、各方向ごとに二分探索しています。
+
+- `UP`: `col_blocks_[pos.j]` から `pos.i` より上の直近ブロックを `lower_bound` で探す
+- `DOWN`: `pos.i` より下の直近ブロックを `upper_bound` で探す
+- `LEFT`: `row_blocks_[pos.i]` から `pos.j` より左の直近ブロックを `lower_bound` で探す
+- `RIGHT`: `pos.j` より右の直近ブロックを `upper_bound` で探す
+
+単体コンパイルは通っています。
+
+```bash
+g++ -std=c++17 -I src -c src/navigator.cpp -o /tmp/navigator.o
+```
+
+ただし全体ビルドは既存の `src/state.h` 不在で失敗しています。`Navigator::bfs()` が未実装で return なし、という警告も出ています。
