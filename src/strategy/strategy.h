@@ -4,14 +4,17 @@
 #include<cassert>
 
 #include"../common.h"
-#include"../state.h"
+#include"../navigator.h"
 #include"../logger.h"
 
 class Strategy{
   public:
-    Strategy();
+    Strategy(std::vector<Pos> distinations);
     virtual ~Strategy();
 
-    virtual std::vector<Pos> solve(State& state,Logger& logger);
+    virtual std::vector<ActionRecord> solve(Navigator& navigator,Logger& logger);
+
+  protected:
+    std::vector<Pos> distinations_;
 };
 

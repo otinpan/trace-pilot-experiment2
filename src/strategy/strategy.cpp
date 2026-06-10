@@ -1,13 +1,15 @@
 #include"strategy.h"
 
-Strategy::Strategy(){
+Strategy::Strategy(std::vector<Pos> distinations)
+  :distinations_(distinations)
+{
 
 }
 
 Strategy::~Strategy()=default;
 
-std::vector<Pos> Strategy::solve(State& state,Logger& logger){
-  (void)state;
+std::vector<ActionRecord> Strategy::solve(Navigator& navigator,Logger& logger){
+  (void)navigator;
   (void)logger;
 
   return{};

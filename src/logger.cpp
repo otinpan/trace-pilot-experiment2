@@ -10,6 +10,6 @@ void Logger::log(const std::string &s){
   ofs_<<s<<'\n';
 }
 
-void Logger::log(const State& state){
+void Logger::log(const Navigator& state){
 }
 
