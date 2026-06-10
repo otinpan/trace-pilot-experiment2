@@ -35,7 +35,9 @@ std::vector<ActionRecord> Navigator::bfs(Pos from,Pos to) const{
 
     // move
     for(int k=0;k<DIRS.size();k++){
-      auto next=move(now,static_cast<Direction>(k));
+// @trace-pilot 6156ba5545d24eed83cf2c50805f2642314a01e8
+      const Direction dir=static_cast<Direction>(k);
+      auto next=move(now,dir);
       if(!next){
         continue;
       }
@@ -45,12 +47,15 @@ std::vector<ActionRecord> Navigator::bfs(Pos from,Pos to) const{
 
       q.push(*next);
       dist[next->i][next->j]=d+1;
-      pre[next->i][next->j]=ActionRecord{ActionType::MOVE,now};
+// @trace-pilot 6156ba5545d24eed83cf2c50805f2642314a01e8
+      pre[next->i][next->j]=ActionRecord{ActionType::MOVE,now,dir};
     }
 
     // slide
     for(int k=0;k<DIRS.size();k++){
-      auto next=slide(now,static_cast<Direction>(k));
+// @trace-pilot 6156ba5545d24eed83cf2c50805f2642314a01e8
+      const Direction dir=static_cast<Direction>(k);
+      auto next=slide(now,dir);
       if(!next){
         continue;
       }
@@ -60,7 +65,8 @@ std::vector<ActionRecord> Navigator::bfs(Pos from,Pos to) const{
 
       q.push(*next);
       dist[next->i][next->j]=d+1;
-      pre[next->i][next->j]=ActionRecord{ActionType::SLIDE,now};
+// @trace-pilot 6156ba5545d24eed83cf2c50805f2642314a01e8
+      pre[next->i][next->j]=ActionRecord{ActionType::SLIDE,now,dir};
     }
   }
 
@@ -73,7 +79,8 @@ std::vector<ActionRecord> Navigator::bfs(Pos from,Pos to) const{
   Pos cur=to;
   while(cur!=from){
     const ActionRecord record=pre[cur.i][cur.j];
-    path.push_back(ActionRecord{record.type,cur});
+// @trace-pilot 6156ba5545d24eed83cf2c50805f2642314a01e8
+    path.push_back(record);
     cur=record.pos;
   }
   reverse(path.begin(),path.end());
