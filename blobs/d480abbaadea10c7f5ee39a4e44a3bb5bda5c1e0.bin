@@ -1,0 +1,18 @@
+-  'C'
+-};
+-
+-struct ActionRecord{
+-  ActionType type;
+-  Pos pos=Pos(-1,-1);
++  'A'
+-
+ 
+-
+ 
++struct ActionRecord{
++  ActionType type;
++  Pos pos=Pos(-1,-1);
++  Direction dir=Direction::UP;
++};
++
+-
