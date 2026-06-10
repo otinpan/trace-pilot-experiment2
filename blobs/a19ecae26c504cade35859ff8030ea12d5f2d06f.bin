@@ -1,0 +1,4 @@
++#include<array>
+ 
++    std::array<std::vector<int>,20> row_blocks_;
++    std::array<std::vector<int>,20> col_blocks_;
