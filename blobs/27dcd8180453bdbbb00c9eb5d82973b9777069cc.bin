@@ -1,0 +1,81 @@
+# Record 1: file:///home/hase/trace-pilot-experiment2/src/state.h
+```diff
+===================================================================
+--- state.h (before)	snapshot
++++ state.h (after)	idle
+@@ -14,8 +14,9 @@
+     bool move(Direction dir);
+     bool slide(Direction dir);
+     bool change(Pos pos);
+     void undo();
++    int calc_score() const;
+ 
+   private:
+     bool is_block(const Pos& pos) const;
+ 
+
+```
+
+# Record 2: file:///home/hase/trace-pilot-experiment2/src/state.cpp
+```diff
+===================================================================
+--- state.cpp (before)	snapshot
++++ state.cpp (after)	external
+@@ -16,8 +16,19 @@
+ }
+ 
+ State::~State()=default;
+ 
++int State::calc_score() const{
++  const int m=visited_count_-1;
++  const int M=static_cast<int>(distinations_.size());
++
++  if(m<M-1){
++    return m+1;
++  }
++
++  return M+2*map_size*M-turn_;
++}
++
+ bool State::move(Direction dir){
+   Pos next_pos=pos_+DIRS[static_cast<int>(dir)];
+   if(!next_pos.is_on_map()){
+     return false;
+@@ -51,5 +62,4 @@
+     return true;
+   }
+   return false;
+ }
+-
+
+```
+
+`calc_score()` だけ追加します。`visited_count_` と手数に相当する値が今どう置かれているかを確認して、最小変更にします。
+
+今のコードでは `visited_count_` が `1` 初期化なので、「初期位置を含む訪問済み数」として扱う計算にします。README の `m` は初期位置を除く訪問数なので、`visited_count_ - 1` に変換します。
+
+宣言を追加しました。続けて `state.cpp` に README の式そのままの実装を入れます。
+
+`calc_score()` を追加しました。コンパイルだけ確認します。
+
+`calc_score()` を追加しました。
+
+- 宣言: [src/state.h](/home/hase/trace-pilot-experiment2/src/state.h)
+- 実装: [src/state.cpp](/home/hase/trace-pilot-experiment2/src/state.cpp)
+
+今の `visited_count_` は `1` 初期化なので、「初期位置を含む訪問済み数」として扱い、README の `m` は `visited_count_ - 1` で計算しています。
+
+```cpp
+int State::calc_score() const{
+  const int m=visited_count_-1;
+  const int M=static_cast<int>(distinations_.size());
+
+  if(m<M-1){
+    return m+1;
+  }
+
+  return M+2*map_size*M-turn_;
+}
+```
+
+`cmake --build build` は通っています。
