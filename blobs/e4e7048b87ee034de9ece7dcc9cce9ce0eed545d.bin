@@ -1,0 +1,1 @@
+Refactor the navigator.cpp code to optimize block handling using efficient data structures and algorithms such as std::lower_bound for sorted insertion and removal.
