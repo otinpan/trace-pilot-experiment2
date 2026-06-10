@@ -4,14 +4,14 @@
 #include<string>
 #include<iomanip>
 
-#include"state.h"
+#include"navigator.h"
 
 class Logger{
   public:
     Logger(const std::string& path);
 
     void log(const std::string& s);
-    void log(const State& state);
+    void log(const Navigator& state);
   private:
     std::ofstream ofs_;
 };

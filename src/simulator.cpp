@@ -1,7 +1,7 @@
 #include"simulator.h"
 
-Simulator::Simulator(State state,Strategy& strategy,Logger& logger)
-  :state_(std::move(state))
+Simulator::Simulator(Navigator navigator,Strategy& strategy,Logger& logger)
+  :navigator_(std::move(navigator))
   ,strategy_(strategy)
   ,logger_(logger)
 {
@@ -12,9 +12,9 @@ Simulator::~Simulator(){
 
 }
 
-std::vector<Pos> Simulator::simulate(){
+std::vector<ActionRecord> Simulator::simulate(){
   logger_.log("start");
-  std::vector<Pos> result=strategy_.solve(state_,logger_);
+  std::vector<ActionRecord> result=strategy_.solve(navigator_,logger_);
 
   return result;
 }
