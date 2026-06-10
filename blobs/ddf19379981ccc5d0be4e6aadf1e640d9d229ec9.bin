@@ -1,0 +1,19 @@
++    enum class ActionType{
++      MOVE,
++      SLIDE,
++      CHANGE
++    };
++
++    struct ActionRecord{
++      ActionType type;
++      Direction dir;
++      Pos prev_pos;
++      int prev_visited_count;
++      int prev_score;
++      Pos changed_pos;
++      bool block_existed_before;
++    };
++
++    int visited_count_;
++    int score_;
++    std::vector<ActionRecord> history_;
