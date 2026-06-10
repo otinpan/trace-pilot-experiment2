@@ -1,0 +1,1 @@
+Refactor the navigator.cpp to manage map blocks efficiently, including adding and removing blocks from row and column data structures, using binary search for insertions and deletions, and ensuring positions are valid on the map with assertions.
