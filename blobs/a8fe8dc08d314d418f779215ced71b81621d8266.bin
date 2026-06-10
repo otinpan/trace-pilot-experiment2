@@ -1,0 +1,105 @@
+# Record 1: file:///home/hase/trace-pilot-experiment2/src/state.cpp
+```diff
+===================================================================
+--- state.cpp (before)	snapshot
++++ state.cpp (after)	idle
+@@ -1,5 +1,6 @@
+ #include"state.h"
++#include<algorithm>
+ 
+ State::State(std::vector<Pos> distinations)
+   :distinations_(distinations)
+   ,pos_(Pos(0,0))
+@@ -58,30 +59,43 @@
+ bool State::change(Pos pos){
+   if(pos_.manhattan_distance(pos)!=1){
+     return false;
+   }
+-  if(pos.is_on_map()){
++  if(!pos.is_on_map()){
+     return false;
+   }
+ 
++  change_block(pos);
++  turn_++;
++  score_=calc_score();
+ 
+   return true;
+ }
+ 
+ void State::change_block(const Pos& pos){
+   assert(pos.is_on_map());
+ 
++  auto& row=row_blocks_[pos.i];
++  auto row_it=std::lower_bound(row.begin(),row.end(),pos.j);
++
++  auto& col=col_blocks_[pos.j];
++  auto col_it=std::lower_bound(col.begin(),col.end(),pos.i);
++
+   if(!blocks_[pos.i][pos.j]){
+-    
++    row.insert(row_it,pos.j);
++    col.insert(col_it,pos.i);
+   }else{
+-
++    assert(row_it!=row.end() && *row_it==pos.j);
++    assert(col_it!=col.end() && *col_it==pos.i);
++    row.erase(row_it);
++    col.erase(col_it);
+   }
+ 
+   blocks_[pos.i][pos.j]=!blocks_[pos.i][pos.j];
+ }
+ 
+ bool State::is_block (const Pos& pos)const{
+-  if(pos.is_on_map()){
++  if(!pos.is_on_map()){
+     return true;
+   }
+   if(blocks_[pos.i][pos.j]){
+     return true;
+
+```
+
+`change_block` の有無と現在の `State` 周辺を確認して、既存の命名に合わせて実装します。
+
+`change_block` は `std::lower_bound` で挿入・削除位置を探す形にします。あわせて、今の `change` / `is_block` は `is_on_map()` の判定が逆になっているので、`change_block` が正しく使えるよう最小限直します。
+
+`change_block` の中身を入れました。`row_blocks_` と `col_blocks_` は常にソート済みになるよう、`lower_bound` の位置へ挿入し、削除時も同じ位置を使います。ビルドで確認します。
+
+できます。`change_block` を実装しました。
+
+[src/state.cpp](/home/hase/trace-pilot-experiment2/src/state.cpp) で、以下のようにしています。
+
+```cpp
+auto& row=row_blocks_[pos.i];
+auto row_it=std::lower_bound(row.begin(),row.end(),pos.j);
+
+auto& col=col_blocks_[pos.j];
+auto col_it=std::lower_bound(col.begin(),col.end(),pos.i);
+```
+
+ブロックがない場合:
+
+```cpp
+row.insert(row_it,pos.j);
+col.insert(col_it,pos.i);
+```
+
+ブロックがある場合:
+
+```cpp
+row.erase(row_it);
+col.erase(col_it);
+```
+
+最後に `blocks_` を反転します。
+
+```cpp
+blocks_[pos.i][pos.j]=!blocks_[pos.i][pos.j];
+```
+
+あわせて、`change()` が `change_block(pos)` を呼ぶようにし、`is_on_map()` 判定が逆だった箇所も直しました。
+
+`cmake --build build` は通っています。  
+ただし既存の `slide(Direction)` が未実装なので、`no return statement` の warning は残っています。
