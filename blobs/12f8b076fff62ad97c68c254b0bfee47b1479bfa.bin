@@ -1,0 +1,54 @@
+# Record 1: /home/hase/trace-pilot-experiment2/src/navigator.cpp
+```diff
+===================================================================
+--- navigator.cpp (before)	snapshot
++++ navigator.cpp (after)	idle
+@@ -1,20 +1,43 @@
+ #include"navigator.h"
++#include<algorithm>
++#include<cassert>
+ 
+ Navigator::Navigator(std::vector<Pos> blocks)
+   :blocks_()
+   ,row_blocks_()
+   ,col_blocks_()
+ {
+-
++  for(const Pos& block:blocks){
++    change_block(block);
++  }
+ }
+ 
+ std::vector<ActionRecord> Navigator::bfs(Pos from,Pos to){
+ 
+ }
+ 
+ void Navigator::change_block(const Pos& pos){
++  assert(pos.is_on_map());
+ 
++  auto& row=row_blocks_[pos.i];
++  auto row_it=std::lower_bound(row.begin(),row.end(),pos.j);
++
++  auto& col=col_blocks_[pos.j];
++  auto col_it=std::lower_bound(col.begin(),col.end(),pos.i);
++
++  const int idx=index(pos);
++  if(!blocks_.test(idx)){
++    row.insert(row_it,pos.j);
++    col.insert(col_it,pos.i);
++  }else{
++    assert(row_it!=row.end() && *row_it==pos.j);
++    assert(col_it!=col.end() && *col_it==pos.i);
++    row.erase(row_it);
++    col.erase(col_it);
++  }
++
++  blocks_.flip(idx);
+ }
+ 
+ bool Navigator::get_block(const Pos& pos){
+   return blocks_.test(index(pos));
+
+```
+
+Code snippet that processes a collection of blocks, applies changes to each block, asserts that a given position is on the map, locates insert positions in row and column collections using std::lower_bound, and either inserts or removes block indices accordingly, flipping a bitset to reflect the block's current state.
