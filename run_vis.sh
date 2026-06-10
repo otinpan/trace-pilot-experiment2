@@ -30,7 +30,10 @@ cmake -S "$ROOT_DIR" -B "$ROOT_DIR/build"
 cmake --build "$ROOT_DIR/build"
 
 OUT_FILE="$ROOT_DIR/out.txt"
-"$ROOT_DIR/build/ahc062" < "$INPUT_PATH" > "$OUT_FILE"
+"$ROOT_DIR/build/ahc046" < "$INPUT_PATH" > "$OUT_FILE"
+
+mkdir -p "$ROOT_DIR/out"
+cp "$OUT_FILE" "$ROOT_DIR/out/1234.txt"
 
 INPUT_FOR_VIS="$INPUT_PATH"
 case "$INPUT_PATH" in
@@ -47,4 +50,3 @@ esac
 echo "Generated:"
 echo "  output: $OUT_FILE"
 echo "  visualizer: $ROOT_DIR/tools/vis.html"
-

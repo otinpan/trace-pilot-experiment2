@@ -27,7 +27,7 @@ struct Pos{
   }
 
   bool operator!=(const Pos& other) const{
-    return i!=other.i && j!=other.j;
+    return i!=other.i || j!=other.j;
   }
 
   bool is_on_map() const{
@@ -48,12 +48,12 @@ enum ActionType{
   CHANGE
 };
 
-struct ActionRecord{
-  ActionType type;
-  Pos pos=Pos(-1,-1);
+const std::array<char,3> ACTIONS_CHAR={
+  'M',
+  'S',
+// @trace-pilot 6156ba5545d24eed83cf2c50805f2642314a01e8
+  'A'
 };
-
-
 
 enum class Direction{
   UP,
@@ -62,6 +62,19 @@ enum class Direction{
   LEFT
 };
 
+const std::array<char,4> DIRS_CHAR={
+  'U',
+  'D',
+  'R',
+  'L'
+};
+
+// @trace-pilot 6156ba5545d24eed83cf2c50805f2642314a01e8
+struct ActionRecord{
+  ActionType type;
+  Pos pos=Pos(-1,-1);
+  Direction dir=Direction::UP;
+};
 
 const std::array<Pos,4> DIRS={
   Pos(-1,0),
@@ -80,5 +93,3 @@ inline Direction get_direction(const Pos& from,const Pos& to){
   assert(false);
   return Direction::UP;
 }
-
-

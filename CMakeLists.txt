@@ -9,9 +9,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_executable(ahc046
     src/main.cpp
     src/logger.cpp
-    src/simulator.cpp
     src/navigator.cpp
     src/strategy/strategy.cpp
+    src/strategy/greedy.cpp
 )
 
 target_include_directories(ahc046 PRIVATE
@@ -21,5 +21,4 @@ target_include_directories(ahc046 PRIVATE
 set_target_properties(ahc046 PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build"
 )
-
 
