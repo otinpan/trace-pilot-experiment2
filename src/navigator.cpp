@@ -13,8 +13,9 @@ Navigator::Navigator(std::vector<Pos> blocks)
   }
 }
 
-// @trace-pilot fc89c8d031bf50dbb6c1b2cd43f3dd536bb5a415
-// 幅優先探索 (BFS)
+// @trace-pilot a7f07c1234b62da91e273884129090dea3520305
+// 幅優先探索
+// fromからtoへの最短経路
 std::vector<ActionRecord> Navigator::bfs(Pos from,Pos to) const{
   using namespace std;
   vector<vector<int>> dist(map_size,vector<int>(map_size,-1));
