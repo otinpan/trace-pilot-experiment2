@@ -3,6 +3,7 @@
 
 #include"common.h"
 #include"strategy/greedy.h"
+#include"strategy/initial_position.h"
 #include"navigator.h"
 
 int map_size=0;
@@ -21,7 +22,7 @@ int main(){
   Navigator navigator({});
   Logger logger("log.txt");
 
-  Greedy strategy(g);
+  InitialPosition strategy(g);
   std::vector<ActionRecord> result=strategy.solve(navigator,logger);
 
   for(const auto& r:result){
