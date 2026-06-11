@@ -4,3 +4,5 @@ tools/
 .intent-tracer/
 out/
 a.out
+log.txt
+out.txt
