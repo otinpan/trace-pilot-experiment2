@@ -1,0 +1,147 @@
+# Record 1: file:///home/hase/trace-pilot-experiment2/src/strategy/initial_position.cpp
+```diff
+===================================================================
+--- initial_position.cpp (before)	snapshot
++++ initial_position.cpp (after)	idle
+@@ -1,6 +1,32 @@
+ #include"initial_position.h"
+ 
++namespace{
++bool append_path_or_fail(
++  std::vector<ActionRecord>& result,
++  Logger& logger,
++  const std::vector<ActionRecord>& path,
++  const Pos& current,
++  const Pos& target,
++  const std::string& label
++){
++  logger.log(
++    label+"\n"
++    "from: ("+std::to_string(current.i)+","+std::to_string(current.j)+") "
++    "to: ("+std::to_string(target.i)+","+std::to_string(target.j)+") "
++    "num of path: "+std::to_string(path.size())
++  );
++
++  if(path.empty() && current!=target){
++    logger.log("unreachable");
++    return false;
++  }
++
++  result.insert(result.end(),path.begin(),path.end());
++  return true;
++}
++}
++
+ InitialPosition::InitialPosition(std::vector<Pos> distinations)
+   :Strategy(distinations)
+ {
+ 
+@@ -30,15 +56,11 @@
+   for(const auto& b:block_pos){
+     const Pos target=b+Pos(0,-1);
+     std::vector<ActionRecord> path=navigator.bfs(current,target);
+ 
+-    logger.log(
+-      "block\n"
+-      "from: ("+std::to_string(current.i)+","+std::to_string(current.j)+") "
+-      "to: ("+std::to_string(target.i)+","+std::to_string(target.j)+") "
+-      "num of path: "+std::to_string(path.size())
+-    );
+-    result.insert(result.end(),path.begin(),path.end());
++    if(!append_path_or_fail(result,logger,path,current,target,"block")){
++      continue;
++    }
+     current=target;
+ 
+     // ブロック配置
+     navigator.change_block(b);
+@@ -51,16 +73,52 @@
+ 
+   // 目的地に移動
+   for(size_t i=1;i<distinations_.size();i++){
+     const Pos target=distinations_[i];
++
++    if(navigator.get_block(target)){
++      const Pos approach=target+Pos(0,-1);
++      if(!approach.is_on_map() || navigator.get_block(approach)){
++        logger.log("blocked destination has no left approach");
++        break;
++      }
++
++      std::vector<ActionRecord> path=navigator.bfs(current,approach);
++      if(!append_path_or_fail(result,logger,path,current,approach,"blocked destination")){
++        break;
++      }
++
++      navigator.change_block(target);
++      result.emplace_back(ActionRecord{
++        ActionType::CHANGE,
++        approach,
++        Direction::RIGHT,
++      });
++      result.emplace_back(ActionRecord{
++        ActionType::MOVE,
++        approach,
++        Direction::RIGHT,
++      });
++      result.emplace_back(ActionRecord{
++        ActionType::MOVE,
++        target,
++        Direction::LEFT,
++      });
++      navigator.change_block(target);
++      result.emplace_back(ActionRecord{
++        ActionType::CHANGE,
++        approach,
++        Direction::RIGHT,
++      });
++
++      current=approach;
++      continue;
++    }
++
+     std::vector<ActionRecord> path=navigator.bfs(current,target);
+-    
+-    logger.log(
+-      "from: ("+std::to_string(current.i)+","+std::to_string(current.j)+") "
+-      "to: ("+std::to_string(target.i)+","+std::to_string(target.j)+") "
+-      "num of path: "+std::to_string(path.size())
+-    );
+-    result.insert(result.end(),path.begin(),path.end());
++    if(!append_path_or_fail(result,logger,path,current,target,"destination")){
++      break;
++    }
+     current=target;
+   }
+ 
+   logger.log("blocks\n");
+
+```
+
+はい、実装できます。訪問対象が現在置いているブロックと一致する場合だけ、通常の `bfs(current, target)` ではなく「左隣へ移動、ブロック解除、右へ移動して訪問、左へ戻る、再配置」という行動列を差し込みます。
+
+あわせて、`bfs` が到達不能を返したときに `current` だけ進めてしまう既存の危険も潰します。そこを残すと、今回の分岐以外でも不正な行動列になり得ます。
+
+分岐を入れました。次にコンパイルして、型や include 周りの問題がないか確認します。
+
+ビルドは通りました。`git diff` が空だったので、作業ツリーの状態を確認して変更がどこに出ているか見ます。
+
+できます。実装しました。
+
+変更点は [src/strategy/initial_position.cpp](/home/hase/trace-pilot-experiment2/src/strategy/initial_position.cpp:1) です。
+
+ブロック済みの目的地に当たった場合は、次の行動列を出すようにしました。
+
+```text
+BFSで目的地の左隣へ移動
+A R  // 右のブロックを削除
+M R  // 目的地へ移動して訪問
+M L  // 左隣へ戻る
+A R  // ブロックを再配置
+```
+
+その後の現在位置は「目的地の左隣」として続行します。目的地自体は一度 `M R` で到達しているので、訪問済み扱いになります。
+
+あわせて、`bfs()` が到達不能で空を返したときに `current` だけ更新してしまう問題も避けるようにしました。到達不能ならそこで処理を止めるか、その初期ブロック配置だけスキップします。
+
+確認として `cmake --build build` は成功しています。
