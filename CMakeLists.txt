@@ -12,6 +12,7 @@ add_executable(ahc046
     src/navigator.cpp
     src/strategy/strategy.cpp
     src/strategy/greedy.cpp
+    src/strategy/initial_position.cpp
 )
 
 target_include_directories(ahc046 PRIVATE

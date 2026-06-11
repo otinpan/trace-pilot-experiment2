@@ -12,6 +12,8 @@ class Navigator{
     ~Navigator()=default;
 
     std::vector<ActionRecord> bfs(Pos from,Pos to) const;
+    void change_block(const Pos& pos);
+    bool get_block(const Pos& pos) const;
 
   private:
     // @trace-pilot 4cda53fe3be35f85a62c26847cb202661d0a9884
@@ -22,8 +24,6 @@ class Navigator{
     int index(const Pos& pos) const{
       return pos.i*N+pos.j;
     }
-    void change_block(const Pos& pos);
-    bool get_block(const Pos& pos) const;
 
 
     std::bitset<N*N> blocks_;

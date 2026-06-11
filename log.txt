@@ -1,39 +1,112 @@
-from: (3,7) to: (14,16) num of path: 10
+block
+from: (3,7) to: (9,8) num of path: 7
+block
+from: (9,8) to: (10,9) num of path: 2
+block
+from: (10,9) to: (3,8) num of path: 5
+block
+from: (3,8) to: (16,9) num of path: 5
+block
+from: (16,9) to: (9,2) num of path: 5
+block
+from: (9,2) to: (10,15) num of path: 8
+destination
+from: (10,15) to: (14,16) num of path: 5
+destination
 from: (14,16) to: (19,19) num of path: 2
-from: (19,19) to: (0,8) num of path: 10
+destination
+from: (19,19) to: (0,8) num of path: 7
+destination
 from: (0,8) to: (0,10) num of path: 2
+destination
 from: (0,10) to: (17,11) num of path: 4
-from: (17,11) to: (11,7) num of path: 10
+destination
+from: (17,11) to: (11,7) num of path: 6
+destination
 from: (11,7) to: (19,12) num of path: 6
-from: (19,12) to: (10,12) num of path: 9
+destination
+from: (19,12) to: (10,12) num of path: 7
+destination
 from: (10,12) to: (5,4) num of path: 10
+destination
 from: (5,4) to: (13,5) num of path: 8
+destination
 from: (13,5) to: (19,10) num of path: 6
+destination
 from: (19,10) to: (19,14) num of path: 4
+destination
 from: (19,14) to: (1,19) num of path: 3
-from: (1,19) to: (8,5) num of path: 13
+destination
+from: (1,19) to: (8,5) num of path: 7
+destination
 from: (8,5) to: (6,9) num of path: 6
-from: (6,9) to: (9,3) num of path: 7
-from: (9,3) to: (10,0) num of path: 2
-from: (10,0) to: (8,7) num of path: 9
+blocked destination
+from: (6,9) to: (9,2) num of path: 4
+destination
+from: (9,2) to: (10,0) num of path: 2
+destination
+from: (10,0) to: (8,7) num of path: 5
+destination
 from: (8,7) to: (17,17) num of path: 6
+destination
 from: (17,17) to: (4,2) num of path: 8
-from: (4,2) to: (1,13) num of path: 9
-from: (1,13) to: (9,17) num of path: 11
+destination
+from: (4,2) to: (1,13) num of path: 8
+destination
+from: (1,13) to: (9,17) num of path: 5
+destination
 from: (9,17) to: (13,4) num of path: 9
-from: (13,4) to: (9,14) num of path: 10
+destination
+from: (13,4) to: (9,14) num of path: 8
+destination
 from: (9,14) to: (19,13) num of path: 2
-from: (19,13) to: (16,9) num of path: 7
-from: (16,9) to: (8,17) num of path: 11
+destination
+from: (19,13) to: (16,9) num of path: 5
+destination
+from: (16,9) to: (8,17) num of path: 7
+destination
 from: (8,17) to: (10,18) num of path: 3
+destination
 from: (10,18) to: (14,3) num of path: 8
+destination
 from: (14,3) to: (14,13) num of path: 7
+destination
 from: (14,13) to: (18,19) num of path: 3
+destination
 from: (18,19) to: (3,14) num of path: 9
+destination
 from: (3,14) to: (8,13) num of path: 6
+destination
 from: (8,13) to: (7,9) num of path: 5
+destination
 from: (7,9) to: (12,18) num of path: 7
-from: (12,18) to: (8,6) num of path: 11
+destination
+from: (12,18) to: (8,6) num of path: 9
+destination
 from: (8,6) to: (10,7) num of path: 3
+destination
 from: (10,7) to: (12,1) num of path: 4
+destination
 from: (12,1) to: (5,17) num of path: 9
+blocks
+
+xxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxx
+xxxxxxxxx.xxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxx
+xxx.xxxxx.xxxxxxxxxx
+xxxxxxxxxx.xxxxx.xxx
+xxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxx.xxxxxxxxx
+xxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxx

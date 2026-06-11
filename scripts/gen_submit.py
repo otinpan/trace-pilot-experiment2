@@ -10,16 +10,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ORDER = [
     "src/common.h",
-    "src/state.h",
-    "src/state.cpp",
+    "src/navigator.h",
+    "src/navigator.cpp",
     "src/logger.h",
     "src/logger.cpp",
     "src/strategy/strategy.h",
     "src/strategy/strategy.cpp",
     "src/strategy/greedy.h",
     "src/strategy/greedy.cpp",
-    "src/simulator.h",
-    "src/simulator.cpp",
+    "src/strategy/initial_position.h",
+    "src/strategy/initial_position.cpp",
     "src/main.cpp",
 ]
 
@@ -98,4 +98,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
