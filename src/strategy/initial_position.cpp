@@ -1,6 +1,5 @@
 #include"initial_position.h"
 
-// @trace-pilot 9e7d89e401697620a1ad8a27d74222e869e9526a
 // 到達不能かどうかの検出
 // 到達不能だった場合は、現在位置を更新しない
 namespace{
@@ -45,7 +44,6 @@ std::vector<ActionRecord> InitialPosition::solve(Navigator& navigator,Logger& lo
     return result;
   }
   std::vector<Pos> block_pos={
-    // @trace-pilot d88412184174097e44fa6ebf41f083e9341d898c
     Pos(9, 9),
     Pos(10,10),
     Pos(3, 9),
@@ -60,7 +58,6 @@ std::vector<ActionRecord> InitialPosition::solve(Navigator& navigator,Logger& lo
     const Pos target=b+Pos(0,-1);
     std::vector<ActionRecord> path=navigator.bfs(current,target);
 
-// @trace-pilot 9e7d89e401697620a1ad8a27d74222e869e9526a
     if(!append_path_or_fail(result,logger,path,current,target,"block")){
       continue;
     }
@@ -79,7 +76,6 @@ std::vector<ActionRecord> InitialPosition::solve(Navigator& navigator,Logger& lo
   for(size_t i=1;i<distinations_.size();i++){
     const Pos target=distinations_[i];
 
-// @trace-pilot 9e7d89e401697620a1ad8a27d74222e869e9526a
     if(navigator.get_block(target)){
       const Pos approach=target+Pos(0,-1);
       if(!approach.is_on_map() || navigator.get_block(approach)){
@@ -120,7 +116,6 @@ std::vector<ActionRecord> InitialPosition::solve(Navigator& navigator,Logger& lo
     }
 
     std::vector<ActionRecord> path=navigator.bfs(current,target);
-// @trace-pilot 9e7d89e401697620a1ad8a27d74222e869e9526a
     if(!append_path_or_fail(result,logger,path,current,target,"destination")){
       break;
     }

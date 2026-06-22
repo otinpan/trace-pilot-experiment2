@@ -7,13 +7,11 @@ Navigator::Navigator(std::vector<Pos> blocks)
   ,row_blocks_()
   ,col_blocks_()
 {
-// @trace-pilot d0b54a024abf0bd00d8ee52220a603d60c21a363
   for(const auto& block:blocks){
     change_block(block);
   }
 }
 
-// @trace-pilot a7f07c1234b62da91e273884129090dea3520305
 // 幅優先探索
 // fromからtoへの最短経路
 std::vector<ActionRecord> Navigator::bfs(Pos from,Pos to) const{
@@ -36,7 +34,6 @@ std::vector<ActionRecord> Navigator::bfs(Pos from,Pos to) const{
 
     // move
     for(int k=0;k<DIRS.size();k++){
-// @trace-pilot 6156ba5545d24eed83cf2c50805f2642314a01e8
       const Direction dir=static_cast<Direction>(k);
       auto next=move(now,dir);
       if(!next){
@@ -48,13 +45,11 @@ std::vector<ActionRecord> Navigator::bfs(Pos from,Pos to) const{
 
       q.push(*next);
       dist[next->i][next->j]=d+1;
-// @trace-pilot 6156ba5545d24eed83cf2c50805f2642314a01e8
       pre[next->i][next->j]=ActionRecord{ActionType::MOVE,now,dir};
     }
 
     // slide
     for(int k=0;k<DIRS.size();k++){
-// @trace-pilot 6156ba5545d24eed83cf2c50805f2642314a01e8
       const Direction dir=static_cast<Direction>(k);
       auto next=slide(now,dir);
       if(!next){
@@ -66,12 +61,10 @@ std::vector<ActionRecord> Navigator::bfs(Pos from,Pos to) const{
 
       q.push(*next);
       dist[next->i][next->j]=d+1;
-// @trace-pilot 6156ba5545d24eed83cf2c50805f2642314a01e8
       pre[next->i][next->j]=ActionRecord{ActionType::SLIDE,now,dir};
     }
   }
 
-// @trace-pilot ac8f01f4bc9b03667e67f8ccd716b35e27159ec9
   if(dist[to.i][to.j]==-1){
     return {};
   }
@@ -80,7 +73,6 @@ std::vector<ActionRecord> Navigator::bfs(Pos from,Pos to) const{
   Pos cur=to;
   while(cur!=from){
     const ActionRecord record=pre[cur.i][cur.j];
-// @trace-pilot 6156ba5545d24eed83cf2c50805f2642314a01e8
     path.push_back(record);
     cur=record.pos;
   }
@@ -88,7 +80,6 @@ std::vector<ActionRecord> Navigator::bfs(Pos from,Pos to) const{
   return path;
 }
 
-// @trace-pilot d0b54a024abf0bd00d8ee52220a603d60c21a363
 void Navigator::change_block(const Pos& pos){
   assert(pos.is_on_map());
 
@@ -134,10 +125,8 @@ std::optional<Pos> Navigator::slide(const Pos& pos,Direction dir) const{
   }
   next=pos;
   switch(dir){
-// @trace-pilot e9c15b09a9b393aa5ed667d6eaf6ae63c7f2a46a
     case Direction::UP:{
       const auto& col=col_blocks_[pos.j];
-// @trace-pilot e9c15b09a9b393aa5ed667d6eaf6ae63c7f2a46a
       auto iter=std::lower_bound(col.begin(),col.end(),pos.i);
       if(iter==col.begin()){
         next.i=0;
@@ -146,7 +135,6 @@ std::optional<Pos> Navigator::slide(const Pos& pos,Direction dir) const{
         next.i=*iter+1;
       }
       break;
-// @trace-pilot e9c15b09a9b393aa5ed667d6eaf6ae63c7f2a46a
     }
     case Direction::DOWN:{
       const auto& col=col_blocks_[pos.j];
@@ -157,7 +145,6 @@ std::optional<Pos> Navigator::slide(const Pos& pos,Direction dir) const{
         next.i=*iter-1;
       }
       break;
-// @trace-pilot e9c15b09a9b393aa5ed667d6eaf6ae63c7f2a46a
     }
     case Direction::RIGHT:{
       const auto& row=row_blocks_[pos.i];
@@ -168,7 +155,6 @@ std::optional<Pos> Navigator::slide(const Pos& pos,Direction dir) const{
         next.j=*iter-1;
       }
       break;
-// @trace-pilot e9c15b09a9b393aa5ed667d6eaf6ae63c7f2a46a
     }
     case Direction::LEFT:{
       const auto& row=row_blocks_[pos.i];
@@ -180,13 +166,11 @@ std::optional<Pos> Navigator::slide(const Pos& pos,Direction dir) const{
         next.j=*iter+1;
       }
       break;
-// @trace-pilot e9c15b09a9b393aa5ed667d6eaf6ae63c7f2a46a
     }
     default:
       assert(false);
   }
 
-// @trace-pilot e9c15b09a9b393aa5ed667d6eaf6ae63c7f2a46a
   if(next==pos){
     return std::nullopt;
   }

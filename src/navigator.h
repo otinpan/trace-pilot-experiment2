@@ -16,7 +16,6 @@ class Navigator{
     bool get_block(const Pos& pos) const;
 
   private:
-    // @trace-pilot 4cda53fe3be35f85a62c26847cb202661d0a9884
     std::optional<Pos> move(const Pos& from,Direction dir) const;
     std::optional<Pos> slide(const Pos& from,Direction dir) const;
 

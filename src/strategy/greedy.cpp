@@ -9,7 +9,6 @@ Greedy::Greedy(std::vector<Pos> distinations)
 Greedy::~Greedy()=default;
 
 std::vector<ActionRecord> Greedy::solve(Navigator& navigator, Logger& logger){
-// @trace-pilot 3ed35a5863409469d033a99aa8e46211aae32d60
   std::vector<ActionRecord> result;
   if(distinations_.empty()){
     return result;

@@ -34,7 +34,6 @@ struct Pos{
     return i>=0 && i<map_size && j>=0 && j<map_size;
   }
 
-  // @trace-pilot 1ffd672428fd4f2c37c60ed660f35d8456364846
   // マンハッタン距離
   int manhattan_distance(const Pos& other) const{
     return std::abs(i-other.i)+std::abs(j-other.j);
@@ -51,7 +50,6 @@ enum ActionType{
 const std::array<char,3> ACTIONS_CHAR={
   'M',
   'S',
-// @trace-pilot 6156ba5545d24eed83cf2c50805f2642314a01e8
   'A'
 };
 
@@ -69,7 +67,6 @@ const std::array<char,4> DIRS_CHAR={
   'L'
 };
 
-// @trace-pilot 6156ba5545d24eed83cf2c50805f2642314a01e8
 struct ActionRecord{
   ActionType type;
   Pos pos=Pos(-1,-1);
