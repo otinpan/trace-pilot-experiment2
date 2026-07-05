@@ -1,0 +1,81 @@
++#include<limits>
++
++std::optional<Pos> Navigator::find_block_center_near_unvisited(
++  const Pos& current,
++  const std::vector<Pos>& destinations,
++  size_t visited_index,
++  int k
++) const{
++  assert(current.is_on_map());
++
++  if(k<=0 || visited_index+1>=destinations.size()){
++    return std::nullopt;
++  }
++
++  const int min_i=current.i-k/2;
++  const int min_j=current.j-k/2;
++  const int max_i=min_i+k-1;
++  const int max_j=min_j+k-1;
++
++  std::vector<Pos> near_unvisited;
++  for(size_t i=visited_index+1;i<destinations.size();i++){
++    const Pos& destination=destinations[i];
++    if(destination.i<min_i || destination.i>max_i){
++      continue;
++    }
++    if(destination.j<min_j || destination.j>max_j){
++      continue;
++    }
++    near_unvisited.push_back(destination);
++  }
++
++  if(near_unvisited.size()<2){
++    return std::nullopt;
++  }
++
++  int sum_i=0;
++  int sum_j=0;
++  for(const auto& destination:near_unvisited){
++    sum_i+=destination.i;
++    sum_j+=destination.j;
++  }
++
++  const int count=static_cast<int>(near_unvisited.size());
++  Pos best(-1,-1);
++  long long best_score=std::numeric_limits<long long>::max();
++
++  for(int i=std::max(0,min_i);i<=std::min(map_size-1,max_i);i++){
++    for(int j=std::max(0,min_j);j<=std::min(map_size-1,max_j);j++){
++      const Pos candidate(i,j);
++      if(candidate==current || get_block(candidate)){
++        continue;
++      }
++
++      bool is_unvisited_destination=false;
++      for(const auto& destination:near_unvisited){
++        if(candidate==destination){
++          is_unvisited_destination=true;
++          break;
++        }
++      }
++      if(is_unvisited_destination){
++        continue;
++      }
++
++      const long long di=static_cast<long long>(i)*count-sum_i;
++      const long long dj=static_cast<long long>(j)*count-sum_j;
++      const long long center_score=di*di+dj*dj;
++      const long long current_score=candidate.manhattan_distance(current);
++      const long long score=center_score*(map_size*map_size)+current_score;
++      if(score<best_score){
++        best_score=score;
++        best=candidate;
++      }
++    }
++  }
++
++  if(!best.is_on_map()){
++    return std::nullopt;
++  }
++  return best;
++}

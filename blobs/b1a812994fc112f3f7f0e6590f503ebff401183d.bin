@@ -1,0 +1,6 @@
++    std::optional<Pos> find_block_center_near_unvisited(
++      const Pos& current,
++      const std::vector<Pos>& destinations,
++      size_t visited_index,
++      int k
++    ) const;
