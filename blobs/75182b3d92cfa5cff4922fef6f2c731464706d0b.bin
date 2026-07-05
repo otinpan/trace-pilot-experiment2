@@ -1,11 +1,1 @@
-# Context from my IDE setup:
-
-## Active file: src/navigator.cpp
-
-## Open tabs:
-- navigator.cpp: src/navigator.cpp
-- move.h: /usr/include/c++/13/bits/move.h
-- greedy.cpp: src/strategy/greedy.cpp
-
-## My request for Codex:
 目的地に到達したら、周辺KxKマスの未訪問目的地を調べ、ブロックを置くために中央の座標を調べる関数をNavigatorクラスに作りたいです。できますか
