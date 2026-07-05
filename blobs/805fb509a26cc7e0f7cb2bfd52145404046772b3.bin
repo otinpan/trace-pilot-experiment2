@@ -1,4 +1,0 @@
--
-+  for(const auto& block:blocks){
-+    change_block(block);
-+  }

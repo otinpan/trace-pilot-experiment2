@@ -1,1 +1,0 @@
-state.cppのchange_blockでposの位置にブロックがないならブロックを配置し、あるなら削除します。blocks_、row_blocks_、col_blocks_を更新します。row_blocks_、col_blocksに関しては、二分探索で追加、削除の場所を調べて高速化したいです。出来ますか

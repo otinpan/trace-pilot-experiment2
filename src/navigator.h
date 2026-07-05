@@ -1,3 +1,4 @@
+// @trace-pilot 93d28c8733ff1ba5cfd88ed7893b36ffd2fb3019
 #pragma once
 #include<iostream>
 #include<vector>
@@ -14,6 +15,12 @@ class Navigator{
     std::vector<ActionRecord> bfs(Pos from,Pos to) const;
     void change_block(const Pos& pos);
     bool get_block(const Pos& pos) const;
+    std::optional<Pos> find_block_center_near_unvisited(
+      const Pos& current,
+      const std::vector<Pos>& destinations,
+      size_t visited_index,
+      int k
+    ) const;
 
   private:
     // @trace-pilot 4cda53fe3be35f85a62c26847cb202661d0a9884

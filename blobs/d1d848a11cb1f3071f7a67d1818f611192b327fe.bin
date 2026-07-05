@@ -1,1 +1,0 @@
-state.hにActionRecordを作ってください。undo()で元の状態に戻しやすくするためです。
