@@ -1,0 +1,191 @@
+# Record 1: file:///home/hase/trace-pilot-experiment2/src/navigator.h
+```diff
+===================================================================
+--- navigator.h (before)	snapshot
++++ navigator.h (after)	external
+@@ -0,0 +1,38 @@
++#pragma once
++#include<iostream>
++#include<vector>
++#include<array>
++#include<bitset>
++#include<optional>
++
++#include"common.h"
++class Navigator{
++  public:
++    Navigator(std::vector<Pos> blocks);
++    ~Navigator()=default;
++
++    std::vector<ActionRecord> bfs(Pos from,Pos to) const;
++    void change_block(const Pos& pos);
++    bool get_block(const Pos& pos) const;
++    std::optional<Pos> find_block_center_near_unvisited(
++      const Pos& current,
++      const std::vector<Pos>& destinations,
++      size_t visited_index,
++      int k
++    ) const;
++
++  private:
++    // @trace-pilot 4cda53fe3be35f85a62c26847cb202661d0a9884
++    std::optional<Pos> move(const Pos& from,Direction dir) const;
++    std::optional<Pos> slide(const Pos& from,Direction dir) const;
++
++    static constexpr int N=20;
++    int index(const Pos& pos) const{
++      return pos.i*N+pos.j;
++    }
++
++
++    std::bitset<N*N> blocks_;
++    std::array<std::vector<int>,N> row_blocks_;
++    std::array<std::vector<int>,N> col_blocks_;
++};
+
+```
+
+# Record 2: file:///home/hase/trace-pilot-experiment2/src/navigator.cpp
+```diff
+===================================================================
+--- navigator.cpp (before)	snapshot
++++ navigator.cpp (after)	idle
+@@ -1,6 +1,7 @@
+ #include"navigator.h"
+ #include<algorithm>
++#include<limits>
+ #include<queue>
+ 
+ Navigator::Navigator(std::vector<Pos> blocks)
+   :blocks_()
+@@ -196,4 +197,84 @@
+ 
+ bool Navigator::get_block(const Pos& pos) const{
+   return blocks_.test(index(pos));
+ }
++
++std::optional<Pos> Navigator::find_block_center_near_unvisited(
++  const Pos& current,
++  const std::vector<Pos>& destinations,
++  size_t visited_index,
++  int k
++) const{
++  assert(current.is_on_map());
++
++  if(k<=0 || visited_index+1>=destinations.size()){
++    return std::nullopt;
++  }
++
++  const int min_i=current.i-k/2;
++  const int min_j=current.j-k/2;
++  const int max_i=min_i+k-1;
++  const int max_j=min_j+k-1;
++
++  std::vector<Pos> near_unvisited;
++  for(size_t i=visited_index+1;i<destinations.size();i++){
++    const Pos& destination=destinations[i];
++    if(destination.i<min_i || destination.i>max_i){
++      continue;
++    }
++    if(destination.j<min_j || destination.j>max_j){
++      continue;
++    }
++    near_unvisited.push_back(destination);
++  }
++
++  if(near_unvisited.size()<2){
++    return std::nullopt;
++  }
++
++  int sum_i=0;
++  int sum_j=0;
++  for(const auto& destination:near_unvisited){
++    sum_i+=destination.i;
++    sum_j+=destination.j;
++  }
++
++  const int count=static_cast<int>(near_unvisited.size());
++  Pos best(-1,-1);
++  long long best_score=std::numeric_limits<long long>::max();
++
++  for(int i=std::max(0,min_i);i<=std::min(map_size-1,max_i);i++){
++    for(int j=std::max(0,min_j);j<=std::min(map_size-1,max_j);j++){
++      const Pos candidate(i,j);
++      if(candidate==current || get_block(candidate)){
++        continue;
++      }
++
++      bool is_unvisited_destination=false;
++      for(const auto& destination:near_unvisited){
++        if(candidate==destination){
++          is_unvisited_destination=true;
++          break;
++        }
++      }
++      if(is_unvisited_destination){
++        continue;
++      }
++
++      const long long di=static_cast<long long>(i)*count-sum_i;
++      const long long dj=static_cast<long long>(j)*count-sum_j;
++      const long long center_score=di*di+dj*dj;
++      const long long current_score=candidate.manhattan_distance(current);
++      const long long score=center_score*(map_size*map_size)+current_score;
++      if(score<best_score){
++        best_score=score;
++        best=candidate;
++      }
++    }
++  }
++
++  if(!best.is_on_map()){
++    return std::nullopt;
++  }
++  return best;
++}
+
+```
+
+できます。`Navigator` は盤面とブロック状態を知っているので、「候補座標が盤内か・既にブロックか」まで見られます。未訪問目的地の範囲だけは戦略側が知っているので、関数には目的地配列と現在の訪問 index を渡す形にするのが自然そうです。
+
+この関数は `Navigator` の public に置いて、`Greedy` や `InitialPosition` から呼べるようにします。返り値は「候補なし」も表せる `std::optional<Pos>` にして、周辺に未訪問目的地が2個以上あるときだけ中央候補を返す形で入れます。
+
+実装方針は少しだけ実用寄りにします。単に平均座標を返すだけだと、そこが既存ブロックや未訪問目的地そのものになることがあるので、平均点に最も近い「盤内・未ブロック・未訪問目的地ではない」マスを返すようにします。
+
+ヘッダに関数を追加しました。次に `navigator.cpp` 側へ、周辺探索、平均点計算、候補マス選択の本体を入れます。
+
+関数本体を追加しました。平均点への近さを最優先にして、同じくらいなら現在地から近い方を選ぶようにしています。いまビルドして型や include 周りを確認します。
+
+ビルドは通りました。呼び出し側はまだ触っていないので、次に `Greedy::solve` から使うなら「到着後にこの関数を呼ぶ → 返ってきた座標の隣へ移動 → `CHANGE`」という流れを追加できます。
+
+できます。`Navigator` に関数を追加して、ビルドまで確認しました。
+
+追加した関数は [src/navigator.h](/home/hase/trace-pilot-experiment2/src/navigator.h:17) のこれです。
+
+```cpp
+std::optional<Pos> find_block_center_near_unvisited(
+  const Pos& current,
+  const std::vector<Pos>& destinations,
+  size_t visited_index,
+  int k
+) const;
+```
+
+動きはこうです。
+
+- `current` を中心に `KxK` 範囲を見る
+- `visited_index + 1` 以降を未訪問目的地として扱う
+- 範囲内の未訪問目的地が2個未満なら `std::nullopt`
+- 複数あれば、その平均座標に近いマスを探す
+- 既存ブロック、現在地、未訪問目的地そのものは避ける
+- 置ける候補があれば `Pos` を返す
+
+実装は [src/navigator.cpp](/home/hase/trace-pilot-experiment2/src/navigator.cpp:201) にあります。
+
+確認済み:
+
+```bash
+cmake --build build
+```
+
+成功しています。次はこの返ってきた座標に対して、隣接マスまで移動して `CHANGE` する処理を `Greedy::solve` に足せます。
