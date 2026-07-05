@@ -15,6 +15,13 @@ class Navigator{
     void change_block(const Pos& pos);
     bool get_block(const Pos& pos) const;
 
+    std::optional<Pos> find_block_center_near_unvisited(
+      const Pos& current,
+      const std::vector<Pos>& destinations,
+      size_t visited_index,
+      int k
+    ) const;
+
   private:
     std::optional<Pos> move(const Pos& from,Direction dir) const;
     std::optional<Pos> slide(const Pos& from,Direction dir) const;
